@@ -1,0 +1,175 @@
+---
+layout: default
+title: Malaysia Flood Information Dashboard
+description: Real-time flood information and statistics from JKM Malaysia
+---
+
+<div class="dashboard">
+    <div class="card" id="total-pps">
+        <h2>Total PPS</h2>
+        <div class="content"></div>
+    </div>
+    <div class="card" id="total-victims">
+        <h2>Total Victims</h2>
+        <div class="content"></div>
+    </div>
+    <div class="card" id="total-families">
+        <h2>Total Families</h2>
+        <div class="content"></div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>PPS Distribution by District</h2>
+    <div id="chart-container"></div>
+</div>
+
+<div class="card">
+    <h2>Detailed Information</h2>
+    <div id="data-table"></div>
+</div>
+
+<div id="loading" class="loading">
+    <i class="fas fa-spinner fa-spin"></i> Loading data...
+</div>
+
+<div id="error" class="error" style="display: none;">
+    An error occurred while fetching the data. Please try again later.
+</div>
+
+<script>
+    const API_URL = 'https://infobencanajkmv2.jkm.gov.my/api/data-dashboard-table-pps.php?a=0&b=0&seasonmain_id=208&seasonnegeri_id=';
+    
+    async function fetchData() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            document.getElementById('loading').style.display = 'none';
+            updateDashboard(data);
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+    }
+
+    function updateDashboard(data) {
+        const totalPPS = data.length;
+        const totalVictims = data.reduce((sum, item) => sum + (parseInt(item.jumlah_mangsa) || 0), 0);
+        const totalFamilies = data.reduce((sum, item) => sum + (parseInt(item.jumlah_keluarga) || 0), 0);
+
+        document.querySelector('#total-pps .content').textContent = totalPPS;
+        document.querySelector('#total-victims .content').textContent = totalVictims;
+        document.querySelector('#total-families .content').textContent = totalFamilies;
+
+        createBarChart(data);
+        createDataTable(data);
+    }
+
+    function createBarChart(data) {
+        const margin = {top: 20, right: 20, bottom: 60, left: 60};
+        const width = 800 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        d3.select('#chart-container').html('');
+
+        const districtData = d3.group(data, d => d.daerah);
+        const aggregatedData = Array.from(districtData, ([key, value]) => ({
+            district: key,
+            count: value.length
+        })).sort((a, b) => b.count - a.count);
+
+        const svg = d3.select('#chart-container')
+            .append('svg')
+            .attr('width', '100%')
+            .attr('height', height + margin.top + margin.bottom)
+            .attr('viewBox', `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+            .append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scaleBand()
+            .range([0, width])
+            .padding(0.1)
+            .domain(aggregatedData.map(d => d.district));
+
+        const y = d3.scaleLinear()
+            .range([height, 0])
+            .domain([0, d3.max(aggregatedData, d => d.count)]);
+
+        svg.selectAll('.bar')
+            .data(aggregatedData)
+            .enter()
+            .append('rect')
+            .attr('class', 'bar')
+            .attr('x', d => x(d.district))
+            .attr('width', x.bandwidth())
+            .attr('y', d => y(d.count))
+            .attr('height', d => height - y(d.count))
+            .attr('fill', '#2196F3');
+
+        svg.selectAll('.bar-label')
+            .data(aggregatedData)
+            .enter()
+            .append('text')
+            .attr('class', 'bar-label')
+            .attr('x', d => x(d.district) + x.bandwidth() / 2)
+            .attr('y', d => y(d.count) - 5)
+            .attr('text-anchor', 'middle')
+            .text(d => d.count);
+
+        svg.append('g')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(x))
+            .selectAll('text')
+            .attr('transform', 'rotate(-45)')
+            .style('text-anchor', 'end');
+
+        svg.append('g')
+            .call(d3.axisLeft(y));
+    }
+
+    function createDataTable(data) {
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+        table.style.marginTop = '20px';
+
+        const thead = table.createTHead();
+        const headerRow = thead.insertRow();
+        const headers = ['PPS Name', 'District', 'Total Victims', 'Total Families', 'Status'];
+        
+        headers.forEach(text => {
+            const th = document.createElement('th');
+            th.textContent = text;
+            th.style.padding = '12px';
+            th.style.backgroundColor = '#2196F3';
+            th.style.color = 'white';
+            headerRow.appendChild(th);
+        });
+
+        const tbody = table.createTBody();
+        data.forEach(item => {
+            const row = tbody.insertRow();
+            [item.nama_pps, item.daerah, item.jumlah_mangsa, item.jumlah_keluarga, item.status]
+                .forEach(text => {
+                    const cell = row.insertCell();
+                    cell.textContent = text;
+                    cell.style.padding = '8px';
+                    cell.style.borderBottom = '1px solid #ddd';
+                });
+        });
+
+        const container = document.getElementById('data-table');
+        container.innerHTML = '';
+        container.appendChild(table);
+    }
+
+    // Initialize dashboard
+    fetchData();
+
+    // Refresh data every 5 minutes
+    setInterval(fetchData, 5 * 60 * 1000);
+</script>

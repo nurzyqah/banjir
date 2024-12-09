@@ -1,0 +1,20 @@
+title: Malaysia Flood Information Dashboard
+description: Real-time flood information dashboard using JKM data
+baseurl: "/banjir"
+url: ""
+
+# Build settings
+theme: jekyll-theme-cayman
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Exclude from processing
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
