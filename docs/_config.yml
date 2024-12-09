@@ -1,0 +1,15 @@
+title: Malaysia Flood Information Dashboard
+description: Real-time flood information and statistics from JKM Malaysia
+baseurl: "/banjir"
+url: "https://nurzyqah.github.io"
+
+# Build settings
+markdown: kramdown
+theme: jekyll-theme-cayman
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor

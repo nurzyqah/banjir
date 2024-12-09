@@ -1,0 +1,82 @@
+---
+layout: default
+title: Malaysia Flood Information Dashboard
+description: Real-time flood information from JKM Malaysia
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }}</title>
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <h1>{{ page.title }}</h1>
+            <p>{{ page.description }}</p>
+        </header>
+
+        <main>
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <i class="fas fa-house-flood-water"></i>
+                    <h3>Total PPS</h3>
+                    <p id="total-pps">Loading...</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Total Victims</h3>
+                    <p id="total-victims">Loading...</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-people-roof"></i>
+                    <h3>Total Families</h3>
+                    <p id="total-families">Loading...</p>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <section class="chart-section">
+                <h2>PPS Distribution by District</h2>
+                <div id="chart"></div>
+            </section>
+
+            <!-- Data Table -->
+            <section class="table-section">
+                <h2>Detailed Information</h2>
+                <div class="table-container">
+                    <table id="data-table">
+                        <thead>
+                            <tr>
+                                <th>PPS Name</th>
+                                <th>District</th>
+                                <th>Total Victims</th>
+                                <th>Total Families</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5">Loading data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Data Source: <a href="https://infobencanajkmv2.jkm.gov.my/" target="_blank">JKM Malaysia</a></p>
+            <p>Last Updated: <span id="last-update">Loading...</span></p>
+        </footer>
+    </div>
+
+    <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
+</body>
+</html>
