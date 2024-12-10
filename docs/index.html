@@ -581,23 +581,30 @@
 
         async function fetchData() {
             try {
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('error').style.display = 'none';
+                const baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                    ? 'http://localhost:8000/'
+                    : 'https://banjir-2.onrender.com';
+
+                const response = await fetch(${baseUrl}/api/centers);
+                console.log('Fetching from:', ${baseUrl}/api/centers);
                 
-                const response = await fetch(API_URL);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                const data = await response.json();
-                globalData = data;
-                document.getElementById('loading').style.display = 'none';
-                updateDashboard(data);
-                updateStateFilter();
-                updateLastUpdated();
+                
+                const responseData = await response.json();
+                console.log('Raw response:', responseData);
+                
+                // Extract the points array from the response
+                if (responseData && responseData.points) {
+                    return responseData.points;
+                } else {
+                    console.error('No points data in response');
+                    return null;
+                }
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
+                console.error('Error fetching data:', error);
+                return null;
             }
         }
 
